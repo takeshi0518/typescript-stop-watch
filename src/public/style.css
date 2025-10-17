@@ -183,20 +183,22 @@ body {
 }
 
 .container {
-  width: 400px;
+  width: 450px;
 }
 
 .display {
   color: #ffffff;
-  text-align: center;
-  font-size: 72px;
+  font-size: 60px;
   margin-bottom: 80px;
+  text-align: center;
+  font-family: Menlo, Monaco, 'Courier New', monospace;
 }
 
 .btn-container {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: end;
+  gap: 50px;
 }
 
 .btn {
