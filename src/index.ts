@@ -5,6 +5,9 @@ const start = document.getElementById('btn-start') as HTMLElement;
 const stop = document.getElementById('btn-stop') as HTMLElement;
 const reset = document.getElementById('btn-reset') as HTMLElement;
 const display = document.getElementById('display') as HTMLElement;
+const progressCircle = document.querySelector(
+  '.progress-ring__circle'
+) as SVGCircleElement;
 
 let elapsed: number = 0;
 let intervalId: number | undefined;
@@ -13,6 +16,13 @@ const startTimer: () => void = () => {
   let now = new Date().getTime();
 
   if (intervalId !== undefined) return;
+
+  gsap.to(progressCircle, {
+    strokeDashoffset: 0,
+    duration: 60,
+    ease: 'none',
+    repeat: -1,
+  });
 
   intervalId = window.setInterval(() => {
     let pre = new Date().getTime();
@@ -26,6 +36,8 @@ const startTimer: () => void = () => {
 const stopTimer: () => void = () => {
   clearInterval(intervalId);
   intervalId = undefined;
+
+  gsap.globalTimeline.pause();
 };
 
 const resetTimer: () => void = () => {
@@ -35,6 +47,9 @@ const resetTimer: () => void = () => {
 
   gsap.killTweensOf(display);
   gsap.set(display, { scale: 1 });
+
+  gsap.killTweensOf(progressCircle);
+  gsap.set(progressCircle, { strokeDashoffset: 1884 });
 
   updateDisplay();
 };
