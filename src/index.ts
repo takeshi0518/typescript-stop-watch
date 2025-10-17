@@ -1,4 +1,5 @@
 import './public/style.css';
+import { gsap } from 'gsap';
 
 const start = document.getElementById('btn-start') as HTMLElement;
 const stop = document.getElementById('btn-stop') as HTMLElement;
@@ -32,6 +33,9 @@ const resetTimer: () => void = () => {
   intervalId = undefined;
   elapsed = 0;
 
+  gsap.killTweensOf(display);
+  gsap.set(display, { scale: 1 });
+
   updateDisplay();
 };
 
@@ -47,6 +51,12 @@ const updateDisplay: () => void = () => {
   const hString = h.toString().padStart(2, '0');
 
   display.innerHTML = `${hString}:${mString}:${sString}.${msString}`;
+
+  gsap.from(display, {
+    scale: 1.05,
+    duration: 0.1,
+    ease: 'power2.out',
+  });
 };
 
 start.addEventListener('click', startTimer);
