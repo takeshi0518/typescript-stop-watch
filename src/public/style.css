@@ -184,6 +184,7 @@ body {
 
 .container {
   width: 450px;
+  position: relative;
 }
 
 .display {
@@ -192,13 +193,17 @@ body {
   margin-bottom: 80px;
   text-align: center;
   font-family: Menlo, Monaco, 'Courier New', monospace;
+  position: relative;
+  z-index: 1;
 }
 
 .btn-container {
+  position: relative;
   display: flex;
   justify-content: center;
   align-items: end;
   gap: 50px;
+  z-index: 2;
 }
 
 .btn {
@@ -235,6 +240,20 @@ body {
   color: #fff;
   width: 80px;
   height: 80px;
+}
+
+.progress-ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.progress-ring__circle {
+  transform: rotate(-90deg);
+  transform-origin: 50% 50%;
+  stroke-dasharray: 1884;
+  stroke-dashoffset: 1884;
 }
 
 /* ----- original css end ----- */
