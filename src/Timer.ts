@@ -1,5 +1,8 @@
-import { gsap } from 'gsap';
+import gsap from 'gsap';
+
 import { TimerConfig } from './types';
+import { CircleAnimation } from './CircleAnimation';
+import { DisplayAnimation } from './DisplayAnimation';
 
 export class Timer {
   private elapsed: number = 0;
@@ -11,6 +14,8 @@ export class Timer {
   private startButton: HTMLElement;
   private stopButton: HTMLElement;
   private resetButton: HTMLElement;
+  private circleAnimation: CircleAnimation;
+  private displayAnimation: DisplayAnimation;
 
   constructor(config: TimerConfig) {
     this.display = document.getElementById(config.selectors.display)!;
@@ -20,8 +25,10 @@ export class Timer {
     this.startButton = document.getElementById(config.selectors.startButton)!;
     this.stopButton = document.getElementById(config.selectors.stopButton)!;
     this.resetButton = document.getElementById(config.selectors.resetButton)!;
-
     this.eventHandler();
+
+    this.circleAnimation = new CircleAnimation(this.progressCircle);
+    this.displayAnimation = new DisplayAnimation(this.display);
   }
 
   private eventHandler(): void {
@@ -36,14 +43,9 @@ export class Timer {
     if (this.intervalId !== undefined) return;
 
     if (this.isAnimationRunning) {
-      gsap.globalTimeline.resume();
+      this.circleAnimation.resume();
     } else {
-      gsap.to(this.progressCircle, {
-        strokeDashoffset: 0,
-        duration: 60,
-        ease: 'none',
-        repeat: -1,
-      });
+      this.circleAnimation.start();
       this.isAnimationRunning = true;
     }
 
@@ -60,7 +62,7 @@ export class Timer {
     clearInterval(this.intervalId);
     this.intervalId = undefined;
 
-    gsap.globalTimeline.pause();
+    this.circleAnimation.pause();
   }
 
   private resetTimer(): void {
@@ -69,11 +71,9 @@ export class Timer {
     this.elapsed = 0;
 
     gsap.globalTimeline.resume();
-    gsap.killTweensOf(this.display);
-    gsap.set(this.display, { scale: 1 });
 
-    gsap.killTweensOf(this.progressCircle);
-    gsap.set(this.progressCircle, { strokeDashoffset: 1884 });
+    this.displayAnimation.reset();
+    this.circleAnimation.reset();
 
     this.isAnimationRunning = false;
 
@@ -93,10 +93,6 @@ export class Timer {
 
     this.display.innerHTML = `${hString}:${mString}:${sString}.${msString}`;
 
-    gsap.from(this.display, {
-      scale: 1.05,
-      duration: 0.1,
-      ease: 'power2.out',
-    });
+    this.displayAnimation.start();
   }
 }
