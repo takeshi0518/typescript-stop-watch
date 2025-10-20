@@ -1,87 +1,122 @@
 import './public/style.css';
 import { gsap } from 'gsap';
 
-const start = document.getElementById('btn-start') as HTMLElement;
-const stop = document.getElementById('btn-stop') as HTMLElement;
-const reset = document.getElementById('btn-reset') as HTMLElement;
-const display = document.getElementById('display') as HTMLElement;
-const progressCircle = document.querySelector(
-  '.progress-ring__circle'
-) as SVGCircleElement;
-let elapsed: number = 0;
-let intervalId: number | undefined;
-let isAnimationRunning = false;
+interface TimerConfig {
+  selectors: {
+    display: string;
+    startButton: string;
+    stopButton: string;
+    resetButton: string;
+    animationKey: string;
+  };
+}
 
-const startTimer: () => void = () => {
-  let now = new Date().getTime();
+class Timer {
+  private elapsed: number = 0;
+  private intervalId: number | undefined = undefined;
+  private isAnimationRunning: boolean = false;
 
-  if (intervalId !== undefined) return;
+  private display: HTMLElement;
+  private progressCircle: HTMLElement;
+  private startButton: HTMLElement;
+  private stopButton: HTMLElement;
+  private resetButton: HTMLElement;
 
-  if (isAnimationRunning) {
-    gsap.globalTimeline.resume();
-  } else {
-    gsap.to(progressCircle, {
-      strokeDashoffset: 0,
-      duration: 60,
-      ease: 'none',
-      repeat: -1,
-    });
-    isAnimationRunning = true;
+  constructor(config: TimerConfig) {
+    this.display = document.getElementById(config.selectors.display)!;
+    this.progressCircle = document.querySelector(
+      config.selectors.animationKey
+    )!;
+    this.startButton = document.getElementById(config.selectors.startButton)!;
+    this.stopButton = document.getElementById(config.selectors.stopButton)!;
+    this.resetButton = document.getElementById(config.selectors.resetButton)!;
+
+    this.eventHandler();
   }
 
-  intervalId = window.setInterval(() => {
-    let pre = new Date().getTime();
-    elapsed += pre - now;
-    now = pre;
+  private eventHandler(): void {
+    this.startButton.addEventListener('click', () => this.startTimer());
+    this.stopButton.addEventListener('click', () => this.stopTimer());
+    this.resetButton.addEventListener('click', () => this.resetTimer());
+  }
 
-    updateDisplay();
-  }, 10);
-};
+  private startTimer(): void {
+    let now = new Date().getTime();
 
-const stopTimer: () => void = () => {
-  clearInterval(intervalId);
-  intervalId = undefined;
+    if (this.intervalId !== undefined) return;
 
-  gsap.globalTimeline.pause();
-};
+    if (this.isAnimationRunning) {
+      gsap.globalTimeline.resume();
+    } else {
+      gsap.to(this.progressCircle, {
+        strokeDashoffset: 0,
+        duration: 60,
+        ease: 'none',
+        repeat: -1,
+      });
+      this.isAnimationRunning = true;
+    }
 
-const resetTimer: () => void = () => {
-  clearInterval(intervalId);
-  intervalId = undefined;
-  elapsed = 0;
+    this.intervalId = window.setInterval(() => {
+      let pre = new Date().getTime();
+      this.elapsed += pre - now;
+      now = pre;
 
-  gsap.globalTimeline.resume();
-  gsap.killTweensOf(display);
-  gsap.set(display, { scale: 1 });
+      this.updateDisplay();
+    }, 10);
+  }
 
-  gsap.killTweensOf(progressCircle);
-  gsap.set(progressCircle, { strokeDashoffset: 1884 });
+  private stopTimer(): void {
+    clearInterval(this.intervalId);
+    this.intervalId = undefined;
 
-  isAnimationRunning = false;
+    gsap.globalTimeline.pause();
+  }
 
-  updateDisplay();
-};
+  private resetTimer(): void {
+    clearInterval(this.intervalId);
+    this.intervalId = undefined;
+    this.elapsed = 0;
 
-const updateDisplay: () => void = () => {
-  const ms = Math.floor((elapsed % 1000) / 10);
-  const s = Math.floor(elapsed / 1000) % 60;
-  const m = Math.floor(elapsed / (1000 * 60)) % 60;
-  const h = Math.floor(elapsed / (1000 * 60 * 60));
+    gsap.globalTimeline.resume();
+    gsap.killTweensOf(this.display);
+    gsap.set(this.display, { scale: 1 });
 
-  const msString = ms.toString().padStart(2, '0');
-  const sString = s.toString().padStart(2, '0');
-  const mString = m.toString().padStart(2, '0');
-  const hString = h.toString().padStart(2, '0');
+    gsap.killTweensOf(this.progressCircle);
+    gsap.set(this.progressCircle, { strokeDashoffset: 1884 });
 
-  display.innerHTML = `${hString}:${mString}:${sString}.${msString}`;
+    this.isAnimationRunning = false;
 
-  gsap.from(display, {
-    scale: 1.05,
-    duration: 0.1,
-    ease: 'power2.out',
-  });
-};
+    this.updateDisplay();
+  }
 
-start.addEventListener('click', startTimer);
-stop.addEventListener('click', stopTimer);
-reset.addEventListener('click', resetTimer);
+  private updateDisplay(): void {
+    const ms = Math.floor((this.elapsed % 1000) / 10);
+    const s = Math.floor(this.elapsed / 1000) % 60;
+    const m = Math.floor(this.elapsed / (1000 * 60)) % 60;
+    const h = Math.floor(this.elapsed / (1000 * 60 * 60));
+
+    const msString = ms.toString().padStart(2, '0');
+    const sString = s.toString().padStart(2, '0');
+    const mString = m.toString().padStart(2, '0');
+    const hString = h.toString().padStart(2, '0');
+
+    this.display.innerHTML = `${hString}:${mString}:${sString}.${msString}`;
+
+    gsap.from(this.display, {
+      scale: 1.05,
+      duration: 0.1,
+      ease: 'power2.out',
+    });
+  }
+}
+
+new Timer({
+  selectors: {
+    display: 'display',
+    startButton: 'btn-start',
+    stopButton: 'btn-stop',
+    resetButton: 'btn-reset',
+    animationKey: '.progress-ring__circle',
+  },
+});
